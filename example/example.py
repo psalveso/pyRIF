@@ -85,8 +85,6 @@ for PDB in PDBs:
     if STATUS: print(f'rif score: {RIF_score}\n{sequence_mapping}')
 
 
-
-print('D_RIF ONLY')
 # RIF just with canonical D-AAs
 RIF = RotamerInteractionField(
     D_AA_RIF_kwargs=D_AA_RIF,

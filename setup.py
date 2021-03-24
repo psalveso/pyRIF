@@ -16,7 +16,7 @@ setup(
     description = 'Using Rotamer Interaction Fields from RIFGen/Dock in python',
     packages = ['pyRIF'],
     package_dir={'pyRIF' : 'pyRIF'},
-    install_requires = ['pyrosetta', 'xbin', 'numpy', 'getpy', 'h5py'],
+    install_requires = ['pyrosetta', 'xbin', 'numpy', 'getpy', 'pynerf', 'h5py'],
     zip_safe = False,
     long_description=readme,
     long_description_content_type='text/markdown',
