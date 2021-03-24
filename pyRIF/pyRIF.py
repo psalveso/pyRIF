@@ -40,6 +40,7 @@ class RotamerInteractionField(object):
         min_RIF_hits=1,
         min_HOTSPOT_hits=0,
         min_RIF_score=0.0,
+        HOTSPOTs_in_RIF=0,
         L_AA_RIF_kwargs={'HDF5' : None, 'rots' : None, 'target' : None},
         D_AA_RIF_kwargs={'HDF5' : None, 'rots' : None, 'target' : None},
         atom_selector=('N', 'CA', 'C'),
@@ -80,6 +81,12 @@ class RotamerInteractionField(object):
         self.min_RIF_hits = min_RIF_hits
         self.min_RIF_score = min_RIF_score
         self.min_HOTSPOT_hits = min_HOTSPOT_hits
+
+        if HOTSPOTs_in_RIF > 0:
+            self.hotspot_irots = np.arange(len(self.L_AA_RIF['rotamer_lines']))[-HOTSPOTs_in_RIF:]
+        else:
+            self.hotspot_irots = np.array([])
+
 
         self.fast_pack_params = fast_pack_kwargs
 
@@ -286,6 +293,8 @@ class RotamerInteractionField(object):
         give the L and D offsets,
         returns the score list, and irot index lest, matched to the bins
         '''
+        # track hotspots
+        hotspot_count = 0
         # make list of lists for holding rotamers and scores
         rotamer_list = [[] for i in range(len(L_offsets) + len(D_offsets))]
         score_list = [[] for i in range(len(L_offsets) + len(D_offsets))]
@@ -313,10 +322,10 @@ class RotamerInteractionField(object):
                 score_list[i].append(score)
                 # hot spot search
                 if self.min_HOTSPOT_hits > 0:
-                    if irot in hotspot_irots:
+                    if irot in self.hotspot_irots:
                         if not np.array_equal(self.L_AA_RIF['sats'][offset, :], failed_hotspot):
                             #### this irot is a HOTSPOT
-                            num_hotspots += 1
+                            hotspot_count += 1
                             # clear all irots at this position except this hotspot
                             rotamer_list[i] = [irot]
                             score_list[i] = [score]
@@ -336,7 +345,7 @@ class RotamerInteractionField(object):
                 score_list[i+j+1].append(score)
                 offset += 1
 
-        return rotamer_list, score_list
+        return rotamer_list, score_list, hotspot_count
 
     def fast_pack(
         self,
@@ -358,7 +367,7 @@ class RotamerInteractionField(object):
 
         This is VERY hacky...
         '''
-        
+
         ###### define 1 body and 2 body packing
         def _build_RIF_hit(
             hit_frame,
@@ -585,7 +594,9 @@ class RotamerInteractionField(object):
         if np.count_nonzero(L_offsets) + np.count_nonzero(D_offsets) <= self.min_RIF_hits - 1: return False, None, None
 
         # 4. get the specific irots for each hit positon
-        rotamer_list, score_list = self.get_irots(L_offsets, D_offsets)
+        rotamer_list, score_list, hotspot_count = self.get_irots(L_offsets, D_offsets)
+        # test on hotspot
+        if self.min_HOTSPOT_hits > 0 and hotspot_count < self.min_HOTSPOT_hits: return False, None, None
 
         # 5. get the L and D frames to rebuild the irots
         LD_frames = np.concatenate(

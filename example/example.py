@@ -33,6 +33,8 @@ D_AA_RIF = {
     'target' : '/net/scratch/psalveso/peptim_cyclize_stapler_outputs/RIF/rifgen_TEAD_D/rif_64_TEAD_sca0.8_noKR.rif.gz_target.pdb.gz',
 }
 
+# some test PDBs
+PDBs = glob.glob(f'/net/scratch/psalveso/peptim_cyclize_stapler_outputs/TEAD/test_RIF_sacffolds/*.pdb')
 
 # setup residue selector to select the target chain
 chain_string = vec1_string()
@@ -53,10 +55,9 @@ RIF = RotamerInteractionField(
     D_AA_RIF_kwargs=D_AA_RIF,
     residue_selector=binder_selector,
     target_selector=target_selector,
+    min_RIF_hits=1,
+    min_RIF_score=-0.5,
 )
-
-
-PDBs = glob.glob(f'/net/scratch/psalveso/peptim_cyclize_stapler_outputs/TEAD/test_RIF_sacffolds/*.pdb')
 
 for PDB in PDBs:
     pose = pose_from_pdb(PDB)
@@ -97,3 +98,26 @@ for PDB in PDBs:
     STATUS, RIF_score, sequence_mapping = RIF.apply(pose)
     # test if pose hit enough RIF interactions, with low enough score
     if STATUS: print(f'rif score: {RIF_score}\n{sequence_mapping}')
+
+# RIF with hotspot searching
+# make the RIF
+RIF = RotamerInteractionField(
+    L_AA_RIF_kwargs=L_AA_RIF,
+    D_AA_RIF_kwargs=D_AA_RIF,
+    residue_selector=binder_selector,
+    target_selector=target_selector,
+    min_HOTSPOT_hits=1,
+    HOTSPOTs_in_RIF=1,
+)
+
+for PDB in PDBs:
+    pose = pose_from_pdb(PDB)
+    # apply the RIF
+    STATUS, RIF_score, sequence_mapping = RIF.apply(pose)
+    # test if pose hit enough RIF interactions, with low enough score
+    if STATUS:
+        print(f'rif score: {RIF_score}\n{sequence_mapping}')
+        # do the remainder of your protocl in here....
+        #
+        # if you want the RIF residues
+        # mutate them onto pose using sequence mapping
