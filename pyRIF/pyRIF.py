@@ -133,8 +133,11 @@ class RotamerInteractionField(object):
             scores[:] = f['scores'][:]
             irots[:] = f['irots'][:]
             binner = xbin.XformBinner(*list(f['cart_ori_bound']))
-            sats = np.zeros(f['sats'].shape, np.int16)
-            sats[:] = f['sats'][:]
+            if 'sats' not in list(f.keys()):
+                sats = None
+            else:
+                sats = np.zeros(f['sats'].shape, np.int16)
+                sats[:] = f['sats'][:]
 
         rotamer_lines = []
         with open(rots) as f:
@@ -322,7 +325,7 @@ class RotamerInteractionField(object):
                 score_list[i].append(score)
                 # hot spot search
                 if self.min_HOTSPOT_hits > 0:
-                    if irot in self.hotspot_irots:
+                    if irot in self.hotspot_irots and self.L_AA_RIF['sats'] is not None:
                         if not np.array_equal(self.L_AA_RIF['sats'][offset, :], failed_hotspot):
                             #### this irot is a HOTSPOT
                             hotspot_count += 1
