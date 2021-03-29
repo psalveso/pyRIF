@@ -1,3 +1,7 @@
 ._*
 *.pyc
 .DS*
+dist
+build
+__pychace__
+*.egg-info
