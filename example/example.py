@@ -1,6 +1,5 @@
 import sys
 import glob
-sys.path.append('/home/psalveso/git_repositories/pyRIF/pyRIF')
 
 # pyrosetta
 import pyrosetta

@@ -645,7 +645,7 @@ class RotamerInteractionField(object):
         #if self.L_AA_RIF['target'] is not None:
         #    pose = self.superimpose(self.L_AA_RIF['target'] , pose)
         #elif self.D_AA_RIF['target'] is not None:
-        #    pose = self.superimpose(self.L_AA_RIF['target'] , pose)
+        #    pose = self.superimpose(self.D_AA_RIF['target'] , pose)
         #else:
         #    raise ValueError('RIF target pose not defined')
 
