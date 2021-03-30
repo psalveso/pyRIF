@@ -7,33 +7,38 @@ from pyrosetta.io import pose_from_pdb
 from pyrosetta.rosetta.utility import vector1_std_string as vec1_string
 from pyrosetta.rosetta.core.select.residue_selector import ChainSelector
 
-
-from pyRIF import RotamerInteractionField
+try:
+    from pyRIF import RotamerInteractionField
+except:
+    sys.path.append('../pyRIF')
+    from pyRIF import RotamerInteractionField
 
 # init pyrosetta with whatever you want
 pyrosetta.init(
     '-mute all '
+    '-beta '
     '-in:file:extra_res_fa /home/psalveso/git_repositories/peptim_stapler/peptim_stapler/_inputs/CYB.params '
     '/home/psalveso/git_repositories/peptim_stapler/peptim_stapler/_inputs/NMX.params '
     '/home/psalveso/git_repositories/peptim_stapler/peptim_stapler/_inputs/B3Z.params '
-    #'/home/psalveso/git_repositories/peptim_stapler/peptim_stapler/_inputs/401.params '
+    '/home/psalveso/projects/BRD/params/CYY.params '
+    '/home/psalveso/projects/BRD/params/KDD.params '
 )
 
 # location of RIF files
 L_AA_RIF = {
-    'HDF5'   : '/net/scratch/psalveso/peptim_cyclize_stapler_outputs/TEAD/RIF_HOTSPOTS/site_65-69/rifdock/py_rif.h5',
-    'rots'   : '/net/scratch/psalveso/peptim_cyclize_stapler_outputs/TEAD/RIF_HOTSPOTS/site_65-69/rifgen/rotamer_index_spec.txt',
-    'target' : '/net/scratch/psalveso/peptim_cyclize_stapler_outputs/TEAD/RIF_HOTSPOTS/site_65-69/rifgen/rif_64_TEAD_sca0.8_noKR.rif.gz_target.pdb.gz'
+    'HDF5'   : '/net/scratch/psalveso/BRDs/RIF/6u8m/rifgen/py_rif.h5',
+    'rots'   : '/net/scratch/psalveso/BRDs/RIF/6u8m/rifgen/rotamer_index_spec.txt',
+    'target' : '/net/scratch/psalveso/BRDs/RIF/6u8m/rifgen/rif_64_6u8m_copy1_sca0.8_noKR.rif.gz_target.pdb.gz'
 }
 
 D_AA_RIF = {
-    'HDF5'   : '/net/scratch/psalveso/peptim_cyclize_stapler_outputs/RIF/rifdock_TEAD_D/py_rif.h5',
-    'rots'   : '/net/scratch/psalveso/peptim_cyclize_stapler_outputs/RIF/rifgen_TEAD_D/rotamer_index_spec.txt',
-    'target' : '/net/scratch/psalveso/peptim_cyclize_stapler_outputs/RIF/rifgen_TEAD_D/rif_64_TEAD_sca0.8_noKR.rif.gz_target.pdb.gz',
+    'HDF5'   : '/net/scratch/psalveso/BRDs/RIF/6u8m/rifgen_d/py_rif.h5',
+    'rots'   : '/net/scratch/psalveso/BRDs/RIF/6u8m/rifgen_d/rotamer_index_spec.txt',
+    'target' : '/net/scratch/psalveso/BRDs/RIF/6u8m/rifgen_d/rif_64_6u8m_copy1_sca0.8_noKR.rif.gz_target.pdb.gz',
 }
 
 # some test PDBs
-PDBs = glob.glob(f'/net/scratch/psalveso/peptim_cyclize_stapler_outputs/TEAD/test_RIF_sacffolds/*.pdb')
+PDBs = glob.glob(f'/home/psalveso/projects/BRD/peptim_cyclize_input_complex/6u8m/PEP/*.pdb')
 
 # setup residue selector to select the target chain
 chain_string = vec1_string()
@@ -57,7 +62,7 @@ RIF = RotamerInteractionField(
     min_RIF_hits=1,
     min_RIF_score=-0.5,
 )
-
+print('L/D RIF')
 for PDB in PDBs:
     pose = pose_from_pdb(PDB)
     # apply the RIF
@@ -77,6 +82,7 @@ RIF = RotamerInteractionField(
     residue_selector=binder_selector,
     target_selector=target_selector,
 )
+print('L RIF')
 for PDB in PDBs:
     pose = pose_from_pdb(PDB)
     # apply the RIF
@@ -91,6 +97,7 @@ RIF = RotamerInteractionField(
     residue_selector=binder_selector,
     target_selector=target_selector,
 )
+print('D RIF')
 for PDB in PDBs:
     pose = pose_from_pdb(PDB)
     # apply the RIF
@@ -106,9 +113,9 @@ RIF = RotamerInteractionField(
     residue_selector=binder_selector,
     target_selector=target_selector,
     min_HOTSPOT_hits=1,
-    HOTSPOTs_in_RIF=1,
+    HOTSPOTs_in_RIF=8,
 )
-
+print('L/D Hotspot RIF')
 for PDB in PDBs:
     pose = pose_from_pdb(PDB)
     # apply the RIF

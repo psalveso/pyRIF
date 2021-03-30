@@ -210,14 +210,14 @@ class RotamerInteractionField(object):
         CA alignment of moving onto target
         """
         # apply target_residue selector to moving
-        target_res_idx = self.target_selector.apply(moving),
+        target_res_idx = self.target_selector.apply(moving)
 
         #store the lengths of the two poses
         target_length = len(target.residues)
         moving_length = len(moving.residues)
 
         #### assuming that res 1, N in target are in moving
-        assert target_length <= moving_length
+        assert target_length <= moving_length, 'RIFgen target model larger than pose, superimpose will fail'
 
         # make the rosetta object to hold xyz coordinates of the residue we want to align
         target_match_coords = rosetta_xyz_vec()
@@ -225,9 +225,11 @@ class RotamerInteractionField(object):
 
         # add the coordinates of the residues to be aligned to their respctive holders
         #iterate over all residues in target
-        for i, idx in enumerate(target_res_idx):
-            if idx:
-                position = i + 1
+        # we do this seperately incase user has weird chain ordering for target protein
+        # in the moving pose
+        for i in range(moving_length):
+            position = i + 1
+            if target_res_idx[position]:
                 moving_coords.append(
                     moving.residues[position].xyz('CA')
                 )
@@ -237,8 +239,7 @@ class RotamerInteractionField(object):
                 target.residues[position].xyz('CA')
             )
 
-        ## TODO TURN ON ASSERTION
-        #assert len(target_match_coords) == len(moving_coords)
+        assert len(target_match_coords) == len(moving_coords), 'mismatch in number of CAs in between RIFgen target model and pose. Check definition of target_selector.'
 
         # make the rotation matrix and pose center rosetta objects
         rotation_matrix = xyzMatrix_double_t()
@@ -642,12 +643,12 @@ class RotamerInteractionField(object):
 
         '''
         # 1. align pose to the RIF target pose
-        #if self.L_AA_RIF['target'] is not None:
-        #    pose = self.superimpose(self.L_AA_RIF['target'] , pose)
-        #elif self.D_AA_RIF['target'] is not None:
-        #    pose = self.superimpose(self.D_AA_RIF['target'] , pose)
-        #else:
-        #    raise ValueError('RIF target pose not defined')
+        if self.L_AA_RIF['target'] is not None:
+            pose = self.superimpose(self.L_AA_RIF['target'] , pose)
+        elif self.D_AA_RIF['target'] is not None:
+            pose = self.superimpose(self.D_AA_RIF['target'] , pose)
+        else:
+            raise ValueError('RIF target pose not defined')
 
         # 2. get indecies for L and D residues in the pose, and binder
         L_idx = np.squeeze(
