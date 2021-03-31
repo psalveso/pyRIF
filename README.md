@@ -1,18 +1,24 @@
 # pyRIF
 Using Rotamer Interaction Fields from RIFGen/Dock in python
 
-
 ### Installation
 `pip install pyRIF`
 
+### Requirements
+[PyRosetta](http://www.pyrosetta.org/home) installed in python environment <br/>[RIFDock](https://github.com/rifdock/rifdock) for generating RIFs
+
+### generating HDF5s of RIFs from RIFGen
+
+include `-dump_rifgen_hdf5` in your `rifgen.flag` file when running RIFGen. this will produce `rif.h5` in your output directory. Then run `python tools/convert_rif_h5.py rif.h5`. This will produce `py_rif.h5`. This is the HDF5 file that will be needed to initialize `RotamerInteractionField()`. You will also need the path to the `rotamer_index_spec.txt` and `target.pdb.gz` created by RIFGen. These will be in the output directory you specified in `rifgen.flag`.
+
 ### Pose Example
-Moves your input pose into the region of the RIF
+Moves your input pose into the region of the RIF, by aligning the `target_selector` residues onto the model specified with `L_AA_RIF['target']`
 ```
 import glob
 import pyrosetta
 from pyrosetta.rosetta.core.select.residue_selector import ChainSelector
 
-from pyrif import RotamerInteractionField
+from pyRIF import RotamerInteractionField
 
 pyrosetta.init()
 
@@ -58,7 +64,7 @@ import glob
 import numpy as np
 import pyrosetta
 
-from pyrif import RotamerInteractionField
+from pyRIF import RotamerInteractionField
 pyrosetta.init()
 
 
@@ -88,3 +94,8 @@ for i in range(binder_xyzs.shape[0]):
         print('fail')
 
 ```
+### Note about packing
+Right now, packing is done by first pruning rotamers at a hit where the rotamer clashes in a voxel grid with the N CA C atoms of the binder (semi-equivalent to 1-body). Each pair of pruned rotamers at position i and j are then clashed checked against one another in the same voxel grid (semi-equivalent to 2-body). The lowest RIF_score set of rotamers at each hit position that survives these voxel clash checks is taken as the output sequence, and the sum of their RIF_scores is the output RIF_score for this pose/xyzs. This score is not the same as the RIF_score output by RIFDock.
+
+### Note about homog
+If you are getting an error on `import pyRIF`, this is due to a bug in the package `homog`. See this [pull-request](https://github.com/willsheffler/homog/commit/526c3f07c720f76333bc8be0cd64b436015ff509) for the fix. In short, on line 11 of `homog/util.py` change `nopython=1, fastmath=1` to `nopython=True, fastmath=True`.
