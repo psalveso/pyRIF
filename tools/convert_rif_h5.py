@@ -4,7 +4,7 @@
 
 import sys
 import os
-
+import getpy as gp# i have no idea why this works. Deals with environment specific SegFault on import xbin.
 import xbin
 import h5py
 
