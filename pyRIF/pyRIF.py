@@ -629,7 +629,8 @@ class RotamerInteractionField(object):
         # 8. convert sequence mapping to residue index
         LD_idx = np.concatenate((L_idx, D_idx), axis=0)
         for i in range(len(sequence_mapping)):
-            sequence_mapping[i][0] = LD_idx[i] + 1# add 1 to get us to Rosetta 1-indexed arrays
+            sequence_mapping[i][0] = LD_idx[sequence_mapping[i][0]] + 1# add 1 to get us to Rosetta 1-indexed arrays
+            # fix from Hanlun
 
         # 9. return total_score, sequence_mapping
         return True, total_rif_score, sequence_mapping

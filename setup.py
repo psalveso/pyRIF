@@ -1,7 +1,7 @@
 from setuptools import setup
 
 
-__version__ ='1.0.3'
+__version__ ='1.0.4'
 
 
 with open("README.md", "r") as readme_file:
